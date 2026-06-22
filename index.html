@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f2a3a">
+<title>Onco-MPI · Calcolatore prognostico</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Onco-MPI">
+<style>
+  :root{
+    --ink:#0f2a3a;        /* deep clinical slate */
+    --ink-soft:#3c5563;
+    --paper:#f6f4ef;      /* warm off-white */
+    --card:#ffffff;
+    --line:#dfe4e2;
+    --accent:#1f6f78;     /* teal */
+    --accent-deep:#12525a;
+    --low:#3f8f5e;        /* muted green */
+    --low-bg:#e7f2eb;
+    --med:#c98a16;        /* amber */
+    --med-bg:#f8efd9;
+    --high:#b23b3b;       /* red */
+    --high-bg:#f6e3e1;
+    --focus:#2aa6b3;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.5;
+    font-size:16px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:20px 16px 64px}
+
+  header{padding:8px 0 18px}
+  .kicker{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin:0 0 6px
+  }
+  h1{font-size:26px;line-height:1.15;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+  .sub{margin:0;color:var(--ink-soft);font-size:14.5px}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 16px;margin:16px 0;
+  }
+  .card h2{
+    font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-soft);margin:0 0 14px;font-weight:700
+  }
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .field.full{grid-column:1 / -1}
+  label{font-size:13.5px;font-weight:600;color:var(--ink)}
+  label .hint{font-weight:400;color:var(--ink-soft);font-size:12px}
+  input,select{
+    width:100%;font:inherit;font-size:16px;color:var(--ink);
+    background:#fff;border:1.5px solid var(--line);border-radius:10px;
+    padding:11px 12px;appearance:none;-webkit-appearance:none;
+  }
+  input:focus,select:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px rgba(42,166,179,.18)}
+  select{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%233c5563' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+  input.err{border-color:var(--high);box-shadow:0 0 0 3px rgba(178,59,59,.14)}
+  .msg{font-size:12px;color:var(--high);min-height:0;margin-top:-1px}
+  .msg.warn{color:var(--med)}
+
+  /* segmented toggles for sex & caregiver */
+  .seg{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{
+    flex:1;font:inherit;font-size:15px;font-weight:600;border:0;background:#fff;
+    color:var(--ink-soft);padding:11px 8px;cursor:pointer
+  }
+  .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .seg button:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+
+  .bmihelper{margin-top:8px;font-size:13px}
+  .bmihelper summary{color:var(--accent);cursor:pointer;font-weight:600;list-style:none}
+  .bmihelper summary::-webkit-details-marker{display:none}
+  .bmihelper summary::before{content:"+ ";font-weight:700}
+  .bmihelper[open] summary::before{content:"– "}
+  .bmihelper .row{display:flex;gap:10px;margin-top:10px}
+
+  /* ---- result ---- */
+  #result{margin-top:20px}
+  .result-card{border-width:1.5px;border-radius:var(--radius);padding:18px 16px;transition:background .25s,border-color .25s}
+  .rc-low{background:var(--low-bg);border-color:var(--low)}
+  .rc-med{background:var(--med-bg);border-color:var(--med)}
+  .rc-high{background:var(--high-bg);border-color:var(--high)}
+  .rc-idle{background:#fff;border-color:var(--line)}
+
+  .score-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .score-big{font-size:44px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}
+  .badge{
+    font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    padding:6px 12px;border-radius:999px;color:#fff;white-space:nowrap
+  }
+  .badge.low{background:var(--low)} .badge.med{background:var(--med)} .badge.high{background:var(--high)}
+  .badge.idle{background:#9aa8af}
+
+  .mortality{margin:14px 0 4px;font-size:15px}
+  .mortality b{font-size:18px;font-variant-numeric:tabular-nums}
+
+  /* signature: RECPAM continuum bar */
+  .meter{margin:18px 0 4px}
+  .meter-track{position:relative;height:16px;border-radius:999px;overflow:hidden;display:flex;border:1px solid rgba(15,42,58,.12)}
+  .meter-track .z{height:100%}
+  .z.low{background:var(--low);flex:0 0 46%}
+  .z.med{background:var(--med);flex:0 0 18%}
+  .z.high{background:var(--high);flex:0 0 36%}
+  .marker{
+    position:absolute;top:-6px;width:0;height:0;left:0;transform:translateX(-50%);
+    border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid var(--ink);
+    transition:left .45s cubic-bezier(.2,.7,.2,1);opacity:0
+  }
+  .marker.show{opacity:1}
+  .marker::after{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:2px;height:14px;background:var(--ink)}
+  .meter-scale{display:flex;justify-content:space-between;margin-top:14px;font-size:11px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .meter-scale span{position:relative}
+
+  .raw{margin-top:14px;font-size:12.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .raw.outrange{color:var(--med);font-weight:600}
+
+  .actions{display:flex;gap:10px;margin-top:18px}
+  .btn{flex:1;font:inherit;font-size:15px;font-weight:700;border-radius:11px;padding:13px;cursor:pointer;border:1.5px solid transparent}
+  .btn-primary{background:var(--ink);color:#fff}
+  .btn-primary:active{background:#091c27}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border-color:var(--line)}
+  .btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+  details.notes{margin:18px 0 0}
+  details.notes summary{font-weight:700;font-size:13px;color:var(--ink);cursor:pointer;padding:6px 0}
+  details.notes p{font-size:13px;color:var(--ink-soft);margin:8px 0}
+  details.notes code{background:#eef1f0;padding:1px 5px;border-radius:5px;font-size:12px}
+
+  footer{margin-top:26px;font-size:12px;color:var(--ink-soft);line-height:1.55}
+  footer .disc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+  footer a{color:var(--accent)}
+
+  @media (max-width:420px){
+    .score-big{font-size:38px}
+    h1{font-size:23px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .marker{transition:none}.result-card{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="kicker">Geriatric Oncology · CGA</p>
+    <h1>Onco-MPI</h1>
+    <p class="sub">Indice prognostico multidimensionale per la mortalità a 1 anno nel paziente oncologico anziano (≥70 anni).</p>
+  </header>
+
+  <div class="card">
+    <h2>Dati del paziente</h2>
+    <div class="grid">
+
+      <div class="field">
+        <label for="age">Età <span class="hint">anni</span></label>
+        <input id="age" type="number" inputmode="numeric" min="40" max="110" step="1" placeholder="es. 78">
+        <div class="msg" id="m-age"></div>
+      </div>
+
+      <div class="field">
+        <label>Sesso</label>
+        <div class="seg" role="group" aria-label="Sesso">
+          <button type="button" id="sexF" data-sex="F" aria-pressed="false">Donna</button>
+          <button type="button" id="sexM" data-sex="M" aria-pressed="false">Uomo</button>
+        </div>
+        <div class="msg" id="m-sex"></div>
+      </div>
+
+      <div class="field full">
+        <label for="bmi">BMI <span class="hint">kg/m²</span></label>
+        <input id="bmi" type="number" inputmode="decimal" min="10" max="60" step="0.1" placeholder="es. 25.4">
+        <div class="msg" id="m-bmi"></div>
+        <details class="bmihelper">
+          <summary>Calcola dal peso e dall'altezza</summary>
+          <div class="row">
+            <div class="field"><label for="kg">Peso <span class="hint">kg</span></label><input id="kg" type="number" inputmode="decimal" min="20" max="250" step="0.1"></div>
+            <div class="field"><label for="cm">Altezza <span class="hint">cm</span></label><input id="cm" type="number" inputmode="decimal" min="100" max="220" step="0.5"></div>
+          </div>
+        </details>
+      </div>
+
+      <div class="field">
+        <label for="adl">ADL <span class="hint">0–6</span></label>
+        <input id="adl" type="number" inputmode="numeric" min="0" max="6" step="1" placeholder="0–6">
+        <div class="msg" id="m-adl"></div>
+      </div>
+
+      <div class="field">
+        <label for="iadl">IADL <span class="hint">0–8</span></label>
+        <input id="iadl" type="number" inputmode="numeric" min="0" max="8" step="1" placeholder="0–8">
+        <div class="msg" id="m-iadl"></div>
+      </div>
+
+      <div class="field">
+        <label for="ecog">ECOG PS</label>
+        <select id="ecog">
+          <option value="" selected disabled>Seleziona</option>
+          <option value="0">0 — attività normale</option>
+          <option value="1">1 — sintomi, ambulatoriale</option>
+          <option value="2">2 — &lt;50% a letto</option>
+          <option value="3">3 — &gt;50% a letto</option>
+          <option value="4">4 — allettato</option>
+        </select>
+        <div class="msg" id="m-ecog"></div>
+      </div>
+
+      <div class="field">
+        <label for="mmse">MMSE <span class="hint">0–30</span></label>
+        <input id="mmse" type="number" inputmode="numeric" min="0" max="30" step="1" placeholder="0–30">
+        <div class="msg" id="m-mmse"></div>
+      </div>
+
+      <div class="field">
+        <label for="comorb">Comorbilità severe <span class="hint">CIRS gr. 3–4</span></label>
+        <input id="comorb" type="number" inputmode="numeric" min="0" max="14" step="1" placeholder="n.">
+        <div class="msg" id="m-comorb"></div>
+      </div>
+
+      <div class="field">
+        <label for="drugs">N° farmaci</label>
+        <input id="drugs" type="number" inputmode="numeric" min="0" max="30" step="1" placeholder="n.">
+        <div class="msg" id="m-drugs"></div>
+      </div>
+
+      <div class="field">
+        <label for="stage">Stadio del tumore</label>
+        <select id="stage">
+          <option value="" selected disabled>Seleziona</option>
+          <option value="I">I</option>
+          <option value="II">II</option>
+          <option value="III">III</option>
+          <option value="IV">IV</option>
+        </select>
+        <div class="msg" id="m-stage"></div>
+      </div>
+
+      <div class="field">
+        <label for="site">Sede del tumore</label>
+        <select id="site">
+          <option value="" selected disabled>Seleziona</option>
+          <option value="mammella">Mammella</option>
+          <option value="colorettale">Colorettale</option>
+          <option value="polmone">Polmone</option>
+          <option value="prostata">Prostata</option>
+          <option value="genitourinario">Altro genitourinario</option>
+          <option value="altro">Altro</option>
+        </select>
+        <div class="msg" id="m-site"></div>
+      </div>
+
+      <div class="field full">
+        <label>Caregiver presente</label>
+        <div class="seg" role="group" aria-label="Caregiver presente">
+          <button type="button" id="cgNo" data-cg="0" aria-pressed="false">No</button>
+          <button type="button" id="cgYes" data-cg="1" aria-pressed="false">Sì</button>
+        </div>
+        <div class="msg" id="m-cg"></div>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" id="calc">Calcola Onco-MPI</button>
+      <button type="button" class="btn btn-ghost" id="reset">Azzera</button>
+    </div>
+  </div>
+
+  <div id="result" aria-live="polite"></div>
+
+  <details class="notes">
+    <summary>Note metodologiche</summary>
+    <p>Il punteggio è la combinazione lineare pesata dei domini secondo i coefficienti della <b>Tabella 3</b> di Brunello et al. (2016): <code>R = Σ(Sᵢ · Dᵢ)</code>, normalizzato come <code>(R + 2,371) / 8,034</code> e ricondotto all'intervallo 0–1.</p>
+    <p>Soglie RECPAM: <b>basso</b> 0–0,46 · <b>medio</b> 0,47–0,63 · <b>alto</b> 0,64–1,00. Mortalità a 1 anno osservata nelle tre classi: 2,1% · 17,7% · 80,8%.</p>
+    <p><b>Avvertenza sugli esempi del paper.</b> Gli esempi clinici discorsivi del testo non sono riproducibili con i coefficienti della Tabella 3 (es.: ADL 6→5 dà di fatto Δ≈0,01, non Δ≈0,18). Questo calcolatore applica fedelmente la formula della Tabella 3, coerente con i ln(HR) del modello multivariato (Tabella 4); i valori narrativi degli esempi vanno considerati con cautela.</p>
+    <p>MMSE è trattato come variabile continua (0–30), come indicato in Tabella 3.</p>
+  </details>
+
+  <footer>
+    <div class="disc"><b>Strumento di supporto decisionale.</b> Non sostituisce la valutazione clinica complessiva né definisce da solo l'indicazione al trattamento. Validato su pazienti ambulatoriali ≥70 anni; uso fuori da questa popolazione non validato.</div>
+    Fonte: Brunello A, et al. <i>Development of an oncological-multidimensional prognostic index (Onco-MPI) for mortality prediction in older cancer patients.</i> J Cancer Res Clin Oncol 2016;142:1069–1077. C-index 0,869 (IC95% 0,841–0,897).
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // Coefficienti — Tabella 3 (Brunello 2016)
+  var W = {
+    age:0.04730, sexMale:0.01706, bmi:-0.09782, adl:-0.07717, iadl:0.04983,
+    ecog:0.70607, comorb:-0.12960, mmse:-0.06270, drugs:-0.01218, caregiverYes:0.21035,
+    stage:{ I:0, II:1.11712, III:0.74957, IV:1.80828 },
+    site:{ altro:0, mammella:-1.93081, colorettale:-1.03025, polmone:0.36265, prostata:-1.57998, genitourinario:0.19956 }
+  };
+  var RAW_MIN = -2.371, RANGE = 8.034;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var state = { sex:null, cg:null };
+
+  // ---- segmented toggles ----
+  function bindSeg(ids, key){
+    ids.forEach(function(id){
+      $(id).addEventListener("click", function(){
+        var val = this.dataset[key];
+        state[key] = val;
+        ids.forEach(function(o){ $(o).setAttribute("aria-pressed","false"); });
+        this.setAttribute("aria-pressed","true");
+        clearMsg("m-"+(key==="sex"?"sex":"cg"));
+      });
+    });
+  }
+  bindSeg(["sexF","sexM"],"sex");
+  bindSeg(["cgNo","cgYes"],"cg");
+
+  // ---- BMI helper ----
+  function recomputeBMI(){
+    var kg = parseFloat($("kg").value), cm = parseFloat($("cm").value);
+    if(isFinite(kg) && isFinite(cm) && cm>0){
+      var m = cm/100, b = kg/(m*m);
+      if(isFinite(b)){ $("bmi").value = b.toFixed(1); clearMsg("m-bmi"); }
+    }
+  }
+  $("kg").addEventListener("input", recomputeBMI);
+  $("cm").addEventListener("input", recomputeBMI);
+
+  function setMsg(id, text, warn){
+    var el = $(id); if(!el) return;
+    el.textContent = text || "";
+    el.className = "msg" + (warn ? " warn" : "");
+  }
+  function clearMsg(id){ setMsg(id,""); }
+
+  // numeric field reader with bounds checking
+  function num(id, min, max, label){
+    var raw = $(id).value.trim();
+    if(raw === ""){ return {ok:false, missing:true}; }
+    var v = parseFloat(raw.replace(",", "."));
+    if(!isFinite(v)){ setMsg("m-"+id, "Valore non valido."); $(id).classList.add("err"); return {ok:false}; }
+    if(v < min || v > max){
+      setMsg("m-"+id, "Range atteso "+min+"–"+max+".", false);
+      $(id).classList.add("err");
+      return {ok:false};
+    }
+    $(id).classList.remove("err"); clearMsg("m-"+id);
+    return {ok:true, v:v};
+  }
+
+  function gather(){
+    var errors = [];
+    var d = {};
+
+    var age = num("age",40,110); if(!age.ok){ errors.push(age.missing?"età":null); } else d.age=age.v;
+    if(age.ok && (age.v<70)) setMsg("m-age","Modello validato per ≥70 anni.", true);
+
+    if(state.sex===null){ errors.push("sesso"); setMsg("m-sex","Seleziona."); } else clearMsg("m-sex");
+
+    var bmi = num("bmi",10,60); if(!bmi.ok){ errors.push(bmi.missing?"BMI":null); } else d.bmi=bmi.v;
+    var adl = num("adl",0,6); if(!adl.ok){ errors.push(adl.missing?"ADL":null); } else d.adl=adl.v;
+    var iadl= num("iadl",0,8); if(!iadl.ok){ errors.push(iadl.missing?"IADL":null); } else d.iadl=iadl.v;
+
+    var ecog = $("ecog").value;
+    if(ecog===""){ errors.push("ECOG"); setMsg("m-ecog","Seleziona."); } else { clearMsg("m-ecog"); d.ecog=parseFloat(ecog); }
+
+    var mmse = num("mmse",0,30); if(!mmse.ok){ errors.push(mmse.missing?"MMSE":null); } else d.mmse=mmse.v;
+    var comorb = num("comorb",0,14); if(!comorb.ok){ errors.push(comorb.missing?"comorbilità":null); } else d.comorb=comorb.v;
+    var drugs = num("drugs",0,30); if(!drugs.ok){ errors.push(drugs.missing?"farmaci":null); } else d.drugs=drugs.v;
+
+    var stage = $("stage").value;
+    if(stage===""){ errors.push("stadio"); setMsg("m-stage","Seleziona."); } else { clearMsg("m-stage"); d.stage=stage; }
+
+    var site = $("site").value;
+    if(site===""){ errors.push("sede"); setMsg("m-site","Seleziona."); } else { clearMsg("m-site"); d.site=site; }
+
+    if(state.cg===null){ errors.push("caregiver"); setMsg("m-cg","Seleziona."); } else clearMsg("m-cg");
+
+    d.sex = state.sex; d.cg = state.cg;
+    return { errors:errors.filter(Boolean), d:d };
+  }
+
+  function rawScore(d){
+    var R = 0;
+    R += W.age * d.age;
+    R += (d.sex==="M") ? W.sexMale : 0;
+    R += W.bmi * d.bmi;
+    R += W.adl * d.adl;
+    R += W.iadl * d.iadl;
+    R += W.ecog * d.ecog;
+    R += W.comorb * d.comorb;
+    R += W.stage[d.stage];
+    R += W.site[d.site];
+    R += W.mmse * d.mmse;
+    R += W.drugs * d.drugs;
+    R += (d.cg==="1") ? W.caregiverYes : 0;
+    return R;
+  }
+
+  function classify(n){
+    if(n < 0.47) return {key:"low",  label:"Rischio basso",   mort:"2,1%"};
+    if(n < 0.64) return {key:"med",  label:"Rischio medio",   mort:"17,7%"};
+    return                {key:"high", label:"Rischio alto",   mort:"80,8%"};
+  }
+
+  function render(R){
+    var n = (R - RAW_MIN) / RANGE;          // normalizzazione
+    var clamped = Math.max(0, Math.min(1, n));
+    var out = clamped !== n;                  // raw fuori dal range osservato
+    var c = classify(clamped);
+    var pct = (clamped*100).toFixed(1);
+
+    var res = $("result");
+    res.innerHTML =
+      '<div class="result-card rc-'+c.key+'">'+
+        '<div class="score-row">'+
+          '<div class="score-big">'+clamped.toFixed(2).replace(".",",")+'</div>'+
+          '<span class="badge '+c.key+'">'+c.label+'</span>'+
+        '</div>'+
+        '<p class="mortality">Mortalità stimata a 1 anno: <b>'+c.mort+'</b></p>'+
+        '<div class="meter" aria-hidden="true">'+
+          '<div class="meter-track">'+
+            '<div class="z low"></div><div class="z med"></div><div class="z high"></div>'+
+            '<div class="marker" id="mk"></div>'+
+          '</div>'+
+          '<div class="meter-scale"><span>0</span><span>0,46</span><span>0,63</span><span>1,0</span></div>'+
+        '</div>'+
+        '<div class="raw'+(out?' outrange':'')+'">Punteggio grezzo R = '+R.toFixed(3).replace(".",",")+
+          (out?' · normalizzato oltre i limiti osservati, troncato a '+pct.replace(".",",")+'%':'')+'</div>'+
+      '</div>';
+
+    // posiziona il marker (track 0..100% == punteggio 0..1)
+    requestAnimationFrame(function(){
+      var mk = $("mk");
+      if(mk){ mk.style.left = (clamped*100)+"%"; mk.classList.add("show"); }
+    });
+    res.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+
+  $("calc").addEventListener("click", function(){
+    var g = gather();
+    if(g.errors.length){
+      $("result").innerHTML =
+        '<div class="result-card rc-idle">'+
+        '<div class="score-row"><div class="score-big" style="font-size:22px;color:var(--ink-soft)">Dati incompleti</div>'+
+        '<span class="badge idle">In attesa</span></div>'+
+        '<p class="mortality" style="color:var(--ink-soft)">Compila: '+g.errors.join(", ")+'.</p></div>';
+      return;
+    }
+    render(rawScore(g.d));
+  });
+
+  $("reset").addEventListener("click", function(){
+    document.querySelectorAll("input").forEach(function(i){ i.value=""; i.classList.remove("err"); });
+    document.querySelectorAll("select").forEach(function(s){ s.selectedIndex=0; });
+    document.querySelectorAll(".msg").forEach(function(m){ m.textContent=""; m.className="msg"; });
+    document.querySelectorAll(".seg button").forEach(function(b){ b.setAttribute("aria-pressed","false"); });
+    state={sex:null,cg:null};
+    $("result").innerHTML="";
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+
+})();
+
+// --- PWA: registrazione service worker (offline) ---
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("./sw.js").catch(function(){ /* offline non disponibile */ });
+  });
+}
+</script>
+</body>
+</html>

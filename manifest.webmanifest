@@ -1,0 +1,19 @@
+{
+  "name": "Onco-MPI — Indice prognostico oncogeriatrico",
+  "short_name": "Onco-MPI",
+  "description": "Calcolatore dell'indice prognostico multidimensionale per la mortalità a 1 anno nel paziente oncologico anziano (≥70 anni).",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f4ef",
+  "theme_color": "#0f2a3a",
+  "categories": ["medical", "health", "productivity"],
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
