@@ -13,6 +13,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Onco-MPI">
 <style>
+  @font-face{
+    font-family:"Onco Display";
+    font-style:normal;font-weight:700;font-display:swap;
+    src:url(data:font/woff;base64,d09GRgABAAAAAAVcAAwAAAAABjwABAEGAAAAAAAAAAAAAAAAAAAAAAAAAABHUE9TAAAFDAAAACAAAAAgRHZMdUdTVUIAAAUsAAAALgAAADAfSCdrT1MvMgAAA5QAAABKAAAAYFq4YFpjbWFwAAAD4AAAAEoAAABcAVYBRWdseWYAAAEcAAABvQAAAgTygbt4aGVhZAAAAxQAAAA2AAAANhpRJHFoaGVhAAADdAAAACAAAAAkC/wBYmhtdHgAAANMAAAAKAAAACgYEgG5bG9jYQAAAvwAAAAWAAAAFgKGAhBtYXhwAAAC3AAAAB0AAAAgACABB25hbWUAAAQsAAAAygAAAYIf9zbOcG9zdAAABPgAAAATAAAAIP+4ADJ4nPv/n8GEUYLxDeMyBiYGTgYGBkYGOyD5kmkfAzMDg7CgsuDL1Uz7/joB+WAZ5kggiweoDCjDrMwMJI2FhZkjV8/tmrf61NHDIKWMS/9FMy77F8W0758U4zMGoLmK/38yfWQ6wcDPIM3AwKKmZmpiZmZsJCYmKsLGpmxmZmqipqzEJioiZsyovjQxcWly8tL4hCXJIampIaGpqaHsMUvT05fExCxJT18aM6cgJjY/Ly42H2Qu0D1MoWD3iALdDDRLWVRZUBFkMBvYUGVRY6ZQi5KwrNWMoiElVvcMDAxjYxnnp9r9YdpnleYUoaelpbcB6C+Z/z+YHJjMGCQZGITALhNXhrnIyNwYaK4S0M0y7vVBmb1i28Sd9C0s9J3Et4n1ZQTVuzPmNbnlpTh4urh4OiQVuDWFQ8KJKZPJhEEY6CoxUWAYQTwICixRoPmMX0pXWRkaWq1eLRVhzmRSn/9vF6O+hZ2dxb+LTHpeqtpAn4FclAB0ETjExPCE2Ktmb5+WoKAWH9/WIENXZ0MjJ0dDDqArwprd3JrDgOQUD2dnD3cXZw+gu2AxDYxZRlFFU8Y3/zwYl/X1AQDST4FEAAAAeJxjYGRgYOBimMDAw1DCwMYA4iEAMwMTABqDASgAAAAAAAAAAAgAFQAxAF0AgQCpAMoA9QECAAAAAQAAAAQBBvDs8BhfDzz1AAMD6AAAAADYpKnIAAAAANsWNsn9zv2iCa0EVAABAAcAAgAAAAAAAAH0AAACRAA0AScAPgOWAD4DEgAhAnAAPgJdABwCogA+An0AHAIfADR4nGNgZGBgkfq3iCGFc+7fcz8lONcyAEVQABcAnhQGZ3icY2BhzmTaw8DKwMDUxRTBwMDgDaEZ4xiMGP2AfAYOBjhgZEACniFu/gwLGHQZ8lmk/i1iSGHJZyqGqWHSYzoIpBQYWAD2FgrEAAB4nGNgYGBiYGBgBmIRIMkIplkYPIA0HwMHUI6NQZfBk8GXIYAhmSH//3+gOITvD+Tn/f///8r/nf+3/d/6f/H/mWDdSAAAS2QSjwAAeJx1jrsOAVEURdcwnoUolUoKj8hEhAqJREWhUnoTr8yYwu/4AqWv8g32XCNCyM3N3Weftc+5QIIxUSw7BVx0n9oio+qpIyS5hjpKnVuobXLcQx0jbcVDHSdnZely4MgZlzVLVpzIU6Nqbp6RnLneoaGOYvZ4pnblbNSbmkQbX+9Knmv6BTPppIRHk4rOUtmA8JlQVurATm7gLaR9zZ0pe5b3uav4VXdUbcX29bceA1o/fvdigp6jbVUdR3sbf8k39UmUXsQDL6o45AAAeJxjYGYAg/9bGYwYsAAALMIB6gAAAQAAAAoAHAAeAAFERkxUAAgABAAAAAD//wAAAAAAAHicY2BkYGDgYtBh0GNgdnHzCWEQSUktM2KQA5KJDHIMLEBZhv//GeAAAKU8BvYAAA==) format("woff");
+  }
+
   :root{
     --ink:#0f2a3a;        /* deep clinical slate */
     --ink-soft:#3c5563;
@@ -48,7 +54,15 @@
     font-size:12px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--accent);font-weight:700;margin:0 0 6px
   }
-  h1{font-size:26px;line-height:1.15;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+  h1{
+    font-family:"Onco Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:42px;line-height:1.04;margin:0 0 8px;font-weight:700;letter-spacing:-.02em;
+    display:inline-block;width:max-content;max-width:100%;
+    color:#1f6f78;
+    background:linear-gradient(100deg,#1e5fa0 0%,#1f8a8f 50%,#46a05f 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
   .sub{margin:0;color:var(--ink-soft);font-size:14.5px}
 
   .card{
@@ -65,6 +79,9 @@
   .field.full{grid-column:1 / -1}
   label{font-size:13.5px;font-weight:600;color:var(--ink)}
   label .hint{font-weight:400;color:var(--ink-soft);font-size:12px}
+  /* coppia comorbilità + farmaci: hint a capo e input allineati */
+  .field.pair > label{min-height:2.7em;line-height:1.35}
+  .field.pair > label .hint{display:block}
   input,select{
     width:100%;font:inherit;font-size:16px;color:var(--ink);
     background:#fff;border:1.5px solid var(--line);border-radius:10px;
@@ -151,7 +168,7 @@
 
   @media (max-width:420px){
     .score-big{font-size:38px}
-    h1{font-size:23px}
+    h1{font-size:33px}
   }
   @media (prefers-reduced-motion:reduce){
     .marker{transition:none}.result-card{transition:none}
@@ -230,13 +247,13 @@
         <div class="msg" id="m-mmse"></div>
       </div>
 
-      <div class="field">
+      <div class="field pair">
         <label for="comorb">Comorbilità severe <span class="hint">CIRS gr. 3–4</span></label>
         <input id="comorb" type="number" inputmode="numeric" min="0" max="14" step="1" placeholder="n.">
         <div class="msg" id="m-comorb"></div>
       </div>
 
-      <div class="field">
+      <div class="field pair">
         <label for="drugs">N° farmaci</label>
         <input id="drugs" type="number" inputmode="numeric" min="0" max="30" step="1" placeholder="n.">
         <div class="msg" id="m-drugs"></div>

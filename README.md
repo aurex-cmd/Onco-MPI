@@ -76,7 +76,7 @@ Dopo la prima apertura l'app resta utilizzabile anche senza connessione.
 Il service worker usa una cache versionata. Dopo ogni modifica a `index.html` (o agli altri file):
 
 1. Aprire `sw.js`.
-2. Incrementare la versione: `const CACHE_VERSION = "onco-mpi-v1";` → `"onco-mpi-v2"`.
+2. Incrementare la versione: `const CACHE_VERSION = "onco-mpi-v2";` → `"onco-mpi-v3"`.
 3. Effettuare il commit.
 
 Al successivo accesso online, i dispositivi scaricano la nuova versione ed eliminano la cache precedente. È l'**unico passaggio manuale** da ricordare a ogni aggiornamento.

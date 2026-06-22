@@ -3,7 +3,7 @@
    cache-first per le risorse statiche. Funziona offline dopo la prima apertura.
    Per pubblicare un aggiornamento dell'app: incrementare CACHE_VERSION. */
 
-const CACHE_VERSION = "onco-mpi-v1";
+const CACHE_VERSION = "onco-mpi-v3";
 const CORE = [
   "./",
   "./index.html",
